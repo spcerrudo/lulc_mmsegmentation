@@ -18,7 +18,20 @@ except ImportError:
 from mmseg.registry import MODELS
 from .utils import _preprare_data
 
+def apply_color_map(segmentation_map, color_map):
+    # Create an empty image with 3 channels for RGB
+    colored_image = np.zeros((*segmentation_map.shape, 3), dtype=np.uint8)
 
+    # Assign a color to each pixel based on its label
+    for label, color in enumerate(color_map):
+        colored_image[segmentation_map == label] = color
+
+    return colored_image
+
+OEM_color_map = [
+    (0, 0, 0), (128, 0, 0),  (0, 255, 36), (148, 148, 148),  (255, 255, 255),
+    (34, 97, 38),  (0, 69, 255), (75, 181, 73),  (222, 31, 7)
+]
 class RSImage:
     """Remote sensing image class.
 
@@ -215,7 +228,7 @@ class RSInferencer:
             self.read_buffer.put([grid, image.read(grid=grid)])
         self.read_buffer.put(self.END_FLAG)
 
-    def inference(self):
+    def inference(self, color_map: Optional[List] = OEM_color_map):
         """Inference image data from read buffer and put the result to write
         buffer."""
         while True:
@@ -227,7 +240,7 @@ class RSInferencer:
             data, _ = _preprare_data(item[1], self.model)
             with torch.no_grad():
                 result = self.model.test_step(data)
-            item[1] = result[0].pred_sem_seg.cpu().data.numpy()[0]
+            item[1] = apply_color_map(result[0].pred_sem_seg.cpu().data.numpy()[0], color_map)
             self.write_buffer.put(item)
             self.read_buffer.task_done()
 
@@ -251,7 +264,8 @@ class RSInferencer:
             image: RSImage,
             window_size: Tuple[int, int],
             strides: Tuple[int, int] = (0, 0),
-            output_path: Optional[str] = None):
+            output_path: Optional[str] = None,
+            color_map: Optional[List] = OEM_color_map):
         """Run inference with multi-threading.
 
         Args:
@@ -267,7 +281,7 @@ class RSInferencer:
         read_thread.start()
         inference_threads = []
         for _ in range(self.thread):
-            inference_thread = threading.Thread(target=self.inference)
+            inference_thread = threading.Thread(target=self.inference(color_map)
             inference_thread.start()
             inference_threads.append(inference_thread)
         write_thread = threading.Thread(
