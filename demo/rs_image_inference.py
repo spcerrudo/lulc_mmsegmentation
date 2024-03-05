@@ -43,7 +43,7 @@ def main():
         device=args.device)
     image = RSImage(args.image)
 
-    inferencer.run(image, args.window_size, args.stride, args.output_path)
+    inferencer.run(image, args.window_size, args.stride, args.output_path, args.color_map)
 
 
 if __name__ == '__main__':
