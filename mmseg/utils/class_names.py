@@ -472,6 +472,19 @@ def bdd100k_palette():
             [255, 0, 0], [0, 0, 142], [0, 0, 70], [0, 60, 100], [0, 80, 100],
             [0, 0, 230], [119, 11, 32]]
 
+def openearthmap_classes():
+    """OpenEarthMap class names for external use."""
+    return [
+        'bareland', 'rangeland', 'developed_space', 'road', 'tree',
+        'water', 'agricultureland', 'building'
+    ]
+
+
+def openearthmap_palette():
+    """OpenEarthMap palette for external use."""
+    return [[128, 0, 0], [255, 255, 36], [148, 148, 148], [255, 255, 255],
+            [34, 97, 198], [0, 69, 255], [75, 181, 73], [222, 31, 7]]
+
 
 dataset_aliases = {
     'cityscapes': ['cityscapes'],
@@ -491,7 +504,8 @@ dataset_aliases = {
     'lip': ['LIP', 'lip'],
     'mapillary_v1': ['mapillary_v1'],
     'mapillary_v2': ['mapillary_v2'],
-    'bdd100k': ['bdd100k']
+    'bdd100k': ['bdd100k'],
+    'openearthmap': ['openearthmap']
 }
 
 
