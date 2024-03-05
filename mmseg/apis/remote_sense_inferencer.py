@@ -28,10 +28,7 @@ def apply_color_map(segmentation_map, color_map):
 
     return colored_image
 
-OEM_color_map = [
-    (0, 0, 0), (128, 0, 0),  (0, 255, 36), (148, 148, 148),  (255, 255, 255),
-    (34, 97, 38),  (0, 69, 255), (75, 181, 73),  (222, 31, 7)
-]
+
 class RSImage:
     """Remote sensing image class.
 
@@ -228,7 +225,7 @@ class RSInferencer:
             self.read_buffer.put([grid, image.read(grid=grid)])
         self.read_buffer.put(self.END_FLAG)
 
-    def inference(self, color_map: Optional[List] = OEM_color_map):
+    def inference(self, color_map: Optional[List] = None):
         """Inference image data from read buffer and put the result to write
         buffer."""
         while True:
@@ -265,7 +262,7 @@ class RSInferencer:
             window_size: Tuple[int, int],
             strides: Tuple[int, int] = (0, 0),
             output_path: Optional[str] = None,
-            color_map: Optional[List] = OEM_color_map):
+            color_map: Optional[List] = None):
         """Run inference with multi-threading.
 
         Args:
