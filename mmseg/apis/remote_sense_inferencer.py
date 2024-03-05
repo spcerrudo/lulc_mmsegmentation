@@ -27,6 +27,10 @@ def apply_color_map(segmentation_map, color_map):
         colored_image[segmentation_map == label] = color
 
     return colored_image
+color_map = [
+    (0, 0, 0), (128, 0, 0),  (0, 255, 36), (148, 148, 148),  (255, 255, 255),
+    (34, 97, 38),  (0, 69, 255), (75, 181, 73),  (222, 31, 7)
+]
 
 
 class RSImage:
@@ -225,7 +229,7 @@ class RSInferencer:
             self.read_buffer.put([grid, image.read(grid=grid)])
         self.read_buffer.put(self.END_FLAG)
 
-    def inference(self, color_map: Optional[List] = None):
+    def inference(self):
         """Inference image data from read buffer and put the result to write
         buffer."""
         while True:
@@ -261,8 +265,7 @@ class RSInferencer:
             image: RSImage,
             window_size: Tuple[int, int],
             strides: Tuple[int, int] = (0, 0),
-            output_path: Optional[str] = None,
-            color_map: Optional[List] = None):
+            output_path: Optional[str] = None):
         """Run inference with multi-threading.
 
         Args:
@@ -278,7 +281,7 @@ class RSInferencer:
         read_thread.start()
         inference_threads = []
         for _ in range(self.thread):
-            inference_thread = threading.Thread(target=self.inference(color_map)
+            inference_thread = threading.Thread(target=self.inference)
             inference_thread.start()
             inference_threads.append(inference_thread)
         write_thread = threading.Thread(
