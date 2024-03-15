@@ -27,11 +27,16 @@ def apply_color_map(segmentation_map, color_map):
         colored_image[segmentation_map == label] = color
 
     return colored_image
+
+# Example color map where class 0 is red, class 1 is green, etc.
+#color_map = [
+#    (128, 0, 0),  (148, 148, 148), (0, 255, 36), (255, 255, 255),
+#    (222, 31, 7),  (75, 181, 73), (0, 69, 255), (34, 97, 38)
+#]
 color_map = [
     (0, 0, 0), (128, 0, 0),  (0, 255, 36), (148, 148, 148),  (255, 255, 255),
     (34, 97, 38),  (0, 69, 255), (75, 181, 73),  (222, 31, 7)
 ]
-
 
 class RSImage:
     """Remote sensing image class.
@@ -83,24 +88,29 @@ class RSImage:
         Raises:
             ValueError: Either grid or data must be provided.
         """
-        if grid is not None:
-            assert len(grid) == 8, 'grid must be a list of 8 elements'
-            for band in self.band_list:
-                band.WriteArray(
-                    data[grid[5]:grid[5] + grid[7], grid[4]:grid[4] + grid[6]],
-                    grid[0] + grid[4], grid[1] + grid[5])
-        elif data is not None:
-            for i in range(self.channel):
-                self.band_list[i].WriteArray(data[..., i])
+        if data is not None:
+            # Ensure data is 3-dimensional (H, W, C)
+            if data.ndim != 3 or data.shape[2] != 3:
+                raise ValueError('Data must be 3-dimensional with 3 channels (RGB)')
+
+            if grid is not None:
+                assert len(grid) == 8, 'grid must be a list of 8 elements'
+                for i in range(3):  # Loop over each channel
+                    self.band_list[i].WriteArray(
+                        data[grid[5]:grid[5] + grid[7], grid[4]:grid[4] + grid[6], i],
+                        grid[0] + grid[4], grid[1] + grid[5])
+            else:
+                for i in range(3):  # Loop over each channel
+                    self.band_list[i].WriteArray(data[..., i])
         else:
-            raise ValueError('Either grid or data must be provided.')
+            raise ValueError('Data must be provided.')
 
     def create_seg_map(self, output_path: Optional[str] = None):
         if output_path is None:
             output_path = 'output_label.tif'
         driver = gdal.GetDriverByName('GTiff')
-        seg_map = driver.Create(output_path, self.width, self.height, 1,
-                                gdal.GDT_Byte)
+        # Create image with 3 bands for RGB
+        seg_map = driver.Create(output_path, self.width, self.height, 3, gdal.GDT_Byte)
         seg_map.SetGeoTransform(self.trans)
         seg_map.SetProjection(self.proj)
         seg_map_img = RSImage(seg_map)
