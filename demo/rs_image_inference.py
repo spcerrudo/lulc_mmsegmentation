@@ -21,19 +21,19 @@ def main():
     parser.add_argument(
         '--window-size',
         help='window xsize,ysize',
-        default=(224, 224),
+        default=(1000, 1000),
         type=int,
         nargs=2)
     parser.add_argument(
         '--stride',
         help='window xstride,ystride',
-        default=(224, 224),
+        default=(1000, 1000),
         type=int,
         nargs=2)
     parser.add_argument(
         '--thread', default=1, type=int, help='number of inference threads')
     parser.add_argument(
-        '--device', default='cuda:0', help='Device used for inference')
+        '--device', default='cuda:3', help='Device used for inference')
     args = parser.parse_args()
     inferencer = RSInferencer.from_config_path(
         args.config,
@@ -48,3 +48,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+
